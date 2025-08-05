@@ -8,12 +8,12 @@ from django.contrib.auth import authenticate
 from .serializers import UserRegisterSerializer, UserSerializer
 from .models import User
 from .utils import send_otp_email
-import pyotp
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @throttle_classes([ScopedRateThrottle])
 def register(request):
+    request.throttle_scope = 'register'
     serializer = UserRegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
@@ -25,6 +25,7 @@ def register(request):
 @permission_classes([AllowAny])
 @throttle_classes([ScopedRateThrottle])
 def resend_otp(request):
+    request.throttle_scope = 'resend_otp'
     email = request.data.get('email')
     if not email:
         return Response({'detail': 'Email is required'}, status=400)
@@ -44,6 +45,7 @@ def resend_otp(request):
 @permission_classes([AllowAny])
 @throttle_classes([ScopedRateThrottle])
 def verify_email(request):
+    request.throttle_scope = 'verify_email'
     email = request.data.get('email')
     otp = request.data.get('otp')
 
@@ -65,6 +67,7 @@ def verify_email(request):
 @permission_classes([AllowAny])
 @throttle_classes([ScopedRateThrottle])
 def login_view(request):
+    request.throttle_scope = 'login'
     email = request.data.get('email')
     password = request.data.get('password')
     user = authenticate(request, email=email, password=password)
